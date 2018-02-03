@@ -2,9 +2,9 @@
   "name": "planfix-toggl",
   "version": "0.1.0",
   "description": "Send metrics from Toggl to Planfix",
-  "main": "index.js",
+  "main": "renderer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node renderer.js"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,10 @@
   "bugs": {
     "url": "https://github.com/viasite/planfix-toggl/issues"
   },
-  "homepage": "https://github.com/viasite/planfix-toggl#readme"
+  "homepage": "https://github.com/viasite/planfix-toggl#readme",
+  "dependencies": {
+    "node-yaml": "^3.1.1",
+    "nodemailer": "^4.4.2",
+    "toggl-api": "^1.0.1"
+  }
 }
