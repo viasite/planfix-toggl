@@ -22,7 +22,7 @@ cd planfix-toggl
 npm install
 ```
 
-Для сборки приложения и инсталлера под Windows смотри "Сборка" ниже.
+Для сборки приложения под Windows смотри "Сборка" ниже.
 
 
 
@@ -41,7 +41,7 @@ https://github.com/popstas/toggl-button
 ## Настройка
 
 ### Клиент
-В меню Edit - Settings указаны настройки для viasite, вы можете переопределить их на свои.
+В конфиге `config.default.yml` указаны настройки для viasite, вы можете переопределить их на свои.
 
 У каждого пользователя есть уникальные настройки, заполните их:
 
@@ -72,10 +72,10 @@ https://github.com/popstas/toggl-button
 
 ## Сборка
 
-```
-# сборка всего нужного для запуска в одну папку `out/planfix-toggl-win32-ia32`
-npm run package:win
+``` bash
+# сборка всего нужного для запуска в `bundle.js`
+npm run webpack
 
-# сборка всего в одиин файл-установщик, работает после сборки package:win
-npm run package:installer
+# сборка всего в одиин файл `planfix-toggl.exe
+npm run nexe
 ```

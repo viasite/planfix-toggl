@@ -1,12 +1,12 @@
 {
   "name": "planfix-toggl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Send metrics from Toggl to Planfix",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "package:win": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=out --icon=assets/app-icon/win/app.ico",
-    "package:installer": "node ./script/installer.js"
+    "send": "js/planfix-toggl.js",
+    "webpack": "webpack",
+    "nexe": "nexe bundle.js --no-bundle --name planfix-toggl --ico assets/app.ico"
   },
   "repository": {
     "type": "git",
@@ -14,8 +14,7 @@
   },
   "keywords": [
     "toggl",
-    "planfix",
-    "electron"
+    "planfix"
   ],
   "author": "Stanislav Popov",
   "license": "MIT",
@@ -24,12 +23,12 @@
   },
   "homepage": "https://github.com/viasite/planfix-toggl#readme",
   "devDependencies": {
-    "electron-packager": "^10.1.2",
-    "electron-winstaller": "^2.6.4"
+    "nexe": "^2.0.0-rc.22",
+    "webpack": "^3.10.0"
   },
   "dependencies": {
-    "electron": "^1.7.12",
-    "electron-settings": "^3.1.4",
+    "express": "~4.15.5",
+    "js-yaml": "^3.10.0",
     "nodemailer": "^4.4.2",
     "toggl-api": "^1.0.1"
   }

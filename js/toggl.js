@@ -1,67 +1,96 @@
+const {promisify} = require('util');
 const nodemailer = require('nodemailer');
 const TogglClient = require('toggl-api');
-const settings = require('electron-settings');
-var toggl;
+const settings = require('./settings');
 
 // валидации всех настроек здесь нет, считается, что их уже проверили
-prefs = settings.getAll();
+let prefs;
+let toggl;
+let pendingEntries;
 
 // получает записи из Toggl и отправляет в Планфикс
-var sendToPlanfix = function(){
+async function sendToPlanfix(){
+    let entries = await getPendingEntries();
+    console.log('report loaded');
+    entries.forEach(function(entry){
+        sendEntry(entry.planfix_task_id, entry);
+        console.log('send', entry);
+    });
+    delete pendingEntries;
+};
+
+async function getPendingEntries(force){
+    if(!pendingEntries || force){
+        pendingEntries = await getPendingEntriesAsync();
+    }
+    return pendingEntries;
+};
+
+function getPendingEntriesAsync(){
+    let entries = [];
+    prefs = settings.getAll();
     toggl = new TogglClient({ apiToken: prefs.apiToken });
-    var me;
 
-    toggl.getUserData({}, function (err, userData) {
-        if (err !== null) {
-            return console.log(err);
-        }
-        me = userData;
+    return new Promise(function(resolve, reject){
+        /* const togglGetUserDataAsync = promisify(toggl.getUserData);
+        togglGetUserDataAsync({})
+            .then(function(me){
+                resolve(me);
+            })
+            .catch(function(err){
+                reject(err)
+            ); */
 
-        toggl.detailedReport({
-            userAgent: prefs.userAgent,
-            workspace_id: prefs.workspaceId,
-            per_page: 500
-        }, function (err, report) {
+        toggl.getUserData({}, function (err, me) {
             if (err !== null) {
-                console.log(err);
-                return;
+                reject(err);
             }
 
-            console.log('report loaded');
-
-            report.data.forEach(function (entry) {
-                isSent = false;
-                planfixTaskId = 0;
-                isMe = entry.uid == me.id;
-                if (!isMe) {
+            toggl.detailedReport({
+                userAgent: prefs.userAgent,
+                workspace_id: prefs.workspaceId,
+                per_page: 500
+            }, function (err, report) {
+                if (err !== null) {
+                    reject(err);
                     return;
                 }
-                entry.tags.forEach(function (tag) {
-                    if (tag.match(/^\d+$/)) {
-                        planfixTaskId = parseInt(tag);
+
+                report.data.forEach(function (entry) {
+                    let isSent = false;
+                    let planfixTaskId = 0;
+                    let isMe = entry.uid == me.id;
+                    if (!isMe) {
+                        return;
                     }
-                    if (tag == prefs.sentTag) {
-                        isSent = true;
+                    entry.tags.forEach(function (tag) {
+                        if (tag.match(/^\d+$/)) {
+                            planfixTaskId = parseInt(tag);
+                        }
+                        if (tag === prefs.sentTag) {
+                            isSent = true;
+                        }
+                    });
+                    if (planfixTaskId > 0 && !isSent) {
+                        entry.planfix_task_id = planfixTaskId;
+                        entries.push(entry);
                     }
                 });
-                if (planfixTaskId > 0 && !isSent) {
-                    sendEntry(planfixTaskId, entry);
-                }
-            });
 
-            console.log('no more entries for sync');
+                resolve(entries);
+            });
         });
     });
 };
 
 // отправка письма и пометка тегом sent в Toggl
-var sendEntry = function (planfixTaskId, entry) {
-    var mins = parseInt(entry.dur / 1000 / 60);
+function sendEntry(planfixTaskId, entry) {
+    let mins = parseInt(entry.dur / 1000 / 60);
 
     let transporter = nodemailer.createTransport({
         host: prefs.smtpHost,
         port: prefs.smtpPort,
-        secure: prefs.smtpSecure=='true' || prefs.smtpSecure == '1',
+        secure: prefs.smtpSecure,
         auth: {
             user: prefs.smtpLogin,
             pass: prefs.smtpPassword
@@ -95,4 +124,5 @@ var sendEntry = function (planfixTaskId, entry) {
     });
 };
 
+module.exports.getPendingEntries = getPendingEntries;
 module.exports.sendToPlanfix = sendToPlanfix;

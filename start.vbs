@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "planfix-toggl.exe", 0
