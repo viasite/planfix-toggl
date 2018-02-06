@@ -1,15 +1,20 @@
 var express = require('express');
 var path = require('path');
+var twig = require('twig');
 var settings = require('./settings');
 var toggl = require('./toggl');
-
 var app = express();
 
 app.get('/', async function(req, res, next) {
   // res.render('index', { title: 'planfix-toggl', entries: entries });
   var entries = await toggl.getPendingEntries(true);
   var out = entries.map(entry => '[' + entry.project + '] ' + entry.description + ' (' + parseInt(entry.dur/60000) + ')');
-  res.send('<title>planfix-toggl</title>Ожидают отправки: ' + out.length + '<br>' + out.join('<br>'));
+  res.render('index.twig', {
+    entries: entries,
+    title: 'planfix-toggl',
+    header: 'Ожидают отправки',
+    planfix_account: settings.get('planfixAccount')
+  });
 });
 
 app.get('/send', async function(req, res, next) {
