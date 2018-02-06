@@ -8,15 +8,17 @@ var app = express();
 app.get('/', async function(req, res, next) {
   // res.render('index', { title: 'planfix-toggl', entries: entries });
   var entries = await toggl.getPendingEntries(true);
-  var out = entries.map(entry => '[' + entry.project + '] ' + entry.description + '(' + parseInt(entry.dur/60000) + ')');
-  res.send('<title>planfix-toggl</title>Ожидают отправки:<br>' + out.join('<br>'));
+  var out = entries.map(entry => '[' + entry.project + '] ' + entry.description + ' (' + parseInt(entry.dur/60000) + ')');
+  res.send('<title>planfix-toggl</title>Ожидают отправки: ' + out.length + '<br>' + out.join('<br>'));
 });
 
 app.get('/send', async function(req, res, next) {
   var entries = await toggl.getPendingEntries();
-  toggl.sendToPlanfix();
-  var out = entries.map(entry => entry.descrciption);
-  res.send('<title>planfix-toggl</title>Отправлены:<br>' + out.join('<br>'));
+  if(entries.length == 0){
+    res.send('<title>send - planfix-toggl</title>Нечего отправлять');
+  }
+  var entriesSent = await toggl.sendToPlanfix();
+  var out = entriesSent.map(entry => entry.description);
 });
 
 app.get('/settings', function(req, res, next) {

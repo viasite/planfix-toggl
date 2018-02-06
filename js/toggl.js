@@ -1,30 +1,37 @@
-const {promisify} = require('util');
 const nodemailer = require('nodemailer');
 const TogglClient = require('toggl-api');
 const settings = require('./settings');
 
+// данные не меняются при этой опции
+const testMode = false;
+
 // валидации всех настроек здесь нет, считается, что их уже проверили
 let prefs;
 let toggl;
-let pendingEntries;
+let pendingEntries = false;
 
 // получает записи из Toggl и отправляет в Планфикс
 async function sendToPlanfix(){
     let entries = await getPendingEntries();
-    console.log('report loaded');
-    entries.forEach(function(entry){
-        sendEntry(entry.planfix_task_id, entry);
-        console.log('send', entry);
+    return new Promise(function(resolve, reject){
+        return Promise.all(entries.map(entry =>
+            sendEntry(entry.planfix_task_id, entry)
+                .then((entry) => {
+                    console.log('entry ' + entry.id + ' sent success');
+                    pendingEntries = false;
+                })
+                .catch((err) => console.log('entry ' + entry.id + ' failed, ' + err))
+        )).then(resolve(entries));
     });
-    delete pendingEntries;
-};
+}
 
 async function getPendingEntries(force){
     if(!pendingEntries || force){
         pendingEntries = await getPendingEntriesAsync();
+        console.log('report loaded');
     }
     return pendingEntries;
-};
+}
 
 function getPendingEntriesAsync(){
     let entries = [];
@@ -32,18 +39,10 @@ function getPendingEntriesAsync(){
     toggl = new TogglClient({ apiToken: prefs.apiToken });
 
     return new Promise(function(resolve, reject){
-        /* const togglGetUserDataAsync = promisify(toggl.getUserData);
-        togglGetUserDataAsync({})
-            .then(function(me){
-                resolve(me);
-            })
-            .catch(function(err){
-                reject(err)
-            ); */
-
         toggl.getUserData({}, function (err, me) {
             if (err !== null) {
                 reject(err);
+                return;
             }
 
             toggl.detailedReport({
@@ -63,10 +62,12 @@ function getPendingEntriesAsync(){
                     if (!isMe) {
                         return;
                     }
+                    // only gigit == planfix_task_id
                     entry.tags.forEach(function (tag) {
                         if (tag.match(/^\d+$/)) {
                             planfixTaskId = parseInt(tag);
                         }
+                        // sent tag
                         if (tag === prefs.sentTag) {
                             isSent = true;
                         }
@@ -81,48 +82,57 @@ function getPendingEntriesAsync(){
             });
         });
     });
-};
+}
 
 // отправка письма и пометка тегом sent в Toggl
 function sendEntry(planfixTaskId, entry) {
-    let mins = parseInt(entry.dur / 1000 / 60);
+    return new Promise(function(resolve, reject){
+        let mins = parseInt(entry.dur / 1000 / 60);
 
-    let transporter = nodemailer.createTransport({
-        host: prefs.smtpHost,
-        port: prefs.smtpPort,
-        secure: prefs.smtpSecure,
-        auth: {
-            user: prefs.smtpLogin,
-            pass: prefs.smtpPassword
-        }
-    });
-
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: prefs.emailFrom,
-        to: 'task+' + planfixTaskId + '@' + prefs.planfixAccount + '.planfix.ru',
-        subject: '@toggl @nonotify',
-        text:
-            'Вид работы: ' + prefs.planfixAnaliticName + '\n' +
-            'time:' + mins + '\n' +
-            'Автор: ' + prefs.planfixAuthorName + '\n' +
-            'Дата: ' + entry.start.substring(0, 10)
-    };
-
-    transporter.sendMail(mailOptions, function(err, info){
-        if (err) {
-            return console.log(err);
-        }
-        console.log('entry [' + entry.project + '] "' + entry.description + '" (' + mins + ') sent to Planfix');
-
-        toggl.updateTimeEntriesTags([entry.id], [prefs.sentTag], 'add', function (err, timeEntries) {
-            if (err !== null) {
-                return console.log(err);
+        let transporter = nodemailer.createTransport({
+            host: prefs.smtpHost,
+            port: prefs.smtpPort,
+            secure: prefs.smtpSecure,
+            auth: {
+                user: prefs.smtpLogin,
+                pass: prefs.smtpPassword
             }
-            console.log('entry ' + entry.id + ' marked as sent');
+        });
+
+        // setup email data with unicode symbols
+        let mailOptions = {
+            from: prefs.emailFrom,
+            to: 'task+' + planfixTaskId + '@' + prefs.planfixAccount + '.planfix.ru',
+            subject: '@toggl @nonotify',
+            text:
+                'Вид работы: ' + prefs.planfixAnaliticName + '\n' +
+                'time:' + mins + '\n' +
+                'Автор: ' + prefs.planfixAuthorName + '\n' +
+                'Дата: ' + entry.start.substring(0, 10)
+        };
+
+        if(testMode){
+            resolve(entry);
+            return;
+        }
+
+        transporter.sendMail(mailOptions, function(err, info){
+            if (err) {
+                reject(err);
+                return;
+            }
+            console.log('entry [' + entry.project + '] "' + entry.description + '" (' + mins + ') sent to Planfix');
+
+            toggl.updateTimeEntriesTags([entry.id], [prefs.sentTag], 'add', function (err, timeEntries) {
+                if (err !== null) {
+                    reject(err);
+                    return;
+                }
+                resolve(entry);
+            });
         });
     });
-};
+}
 
 module.exports.getPendingEntries = getPendingEntries;
 module.exports.sendToPlanfix = sendToPlanfix;

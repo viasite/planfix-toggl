@@ -4,3 +4,4 @@ config.yml
 out/
 /bundle.js
 /planfix-toggl.exe
+/planfix-toggl/
