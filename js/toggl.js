@@ -6,88 +6,108 @@ const settings = require('./settings');
 const testMode = false;
 
 // валидации всех настроек здесь нет, считается, что их уже проверили
-let prefs;
-let toggl;
-let pendingEntries = false;
+let user;
+const prefs = settings.getAll();
+const toggl = new TogglClient({ apiToken: prefs.apiToken });
 
 // получает записи из Toggl и отправляет в Планфикс
 async function sendToPlanfix(){
-    let entries = await getPendingEntries();
-    return new Promise(function(resolve, reject){
-        return Promise.all(entries.map(entry =>
-            sendEntry(entry.planfix_task_id, entry)
-                .then((entry) => {
-                    console.log('entry ' + entry.id + ' sent success');
-                    pendingEntries = false;
-                })
-                .catch((err) => console.log('entry ' + entry.id + ' failed, ' + err))
-        )).then(resolve(entries));
+    let pendingEntries = await getPendingEntries();
+    let entries = groupEntriesByTask(pendingEntries);
+    entries.forEach(entry => (async (entry) => {
+        let entryString = entry.description + ' (' + Math.round(entry.dur / 60000) + ')';
+        try{
+            await sendEntry(entry.planfix.task_id, entry);
+            console.log('entry ' + entryString + ' sent to #' + entry.planfix.task_id);
+        } catch (err){
+            console.log('entry ' + entryString + ' failed');
+        }
+    })(entry));
+    return entries;
+}
+
+function groupEntriesByTask(entries){
+    let grouped = {};
+    entries.forEach(entry => {
+        if(grouped.hasOwnProperty(entry.planfix_task_id)){
+            grouped[entry.planfix_task_id].dur += entry.dur;
+        } else {
+            grouped[entry.planfix_task_id] = entry;
+        }
     });
+    return Object.values(grouped);
 }
 
-async function getPendingEntries(force){
-    if(!pendingEntries || force){
-        pendingEntries = await getPendingEntriesAsync();
-        console.log('report loaded');
-    }
-    return pendingEntries;
-}
-
-function getPendingEntriesAsync(){
-    let entries = [];
-    prefs = settings.getAll();
-    toggl = new TogglClient({ apiToken: prefs.apiToken });
-
-    return new Promise(function(resolve, reject){
+function getUserData(){
+    return new Promise((resolve, reject) => {
+        if(user){
+            resolve(user);
+            return;
+        }
         toggl.getUserData({}, function (err, me) {
-            if (err !== null) {
+            if (err) {
                 reject(err);
                 return;
             }
-
-            toggl.detailedReport({
-                userAgent: prefs.userAgent,
-                workspace_id: prefs.workspaceId,
-                per_page: 500
-            }, function (err, report) {
-                if (err !== null) {
-                    reject(err);
-                    return;
-                }
-
-                report.data.forEach(function (entry) {
-                    let isSent = false;
-                    let planfixTaskId = 0;
-                    let isMe = entry.uid == me.id;
-                    if (!isMe) {
-                        return;
-                    }
-                    // only gigit == planfix_task_id
-                    entry.tags.forEach(function (tag) {
-                        if (tag.match(/^\d+$/)) {
-                            planfixTaskId = parseInt(tag);
-                        }
-                        // sent tag
-                        if (tag === prefs.sentTag) {
-                            isSent = true;
-                        }
-                    });
-                    if (planfixTaskId > 0 && !isSent) {
-                        entry.planfix_task_id = planfixTaskId;
-                        entries.push(entry);
-                    }
-                });
-
-                resolve(entries);
-            });
+            user = me;
+            resolve(me);
         });
     });
+}
+
+// native toggl report
+function getReport(opts){
+    return new Promise((resolve, reject) => {
+        if(!opts.workspace_id){
+            opts.workspace_id = prefs.workspaceId;
+        }
+        toggl.detailedReport(opts, function (err, report) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(report);
+        });
+    });
+}
+
+// report entries with planfix data
+async function getEntries(opts){
+    let report = await getReport(opts);
+    return report.data.map(entry => {
+        entry.planfix = {
+            sent: false,
+            task_id: 0
+        }
+
+        entry.tags.forEach(tag => {
+            // only digit == planfix_task_id
+            if (tag.match(/^\d+$/)) {
+                entry.planfix.task_id = parseInt(tag);
+            }
+            // sent tag
+            if (tag === prefs.sentTag) {
+                entry.planfix.sent = true;
+            }
+        });
+
+        return entry;
+    });
+}
+
+async function getPendingEntries(){
+    let user = await getUserData();
+    let entries = await getEntries({});
+    return entries
+        .filter(entry => entry.planfix.task_id != 0)
+        .filter(entry => !entry.planfix.sent)
+        .filter(entry => entry.uid == user.id)
 }
 
 // отправка письма и пометка тегом sent в Toggl
 function sendEntry(planfixTaskId, entry) {
     return new Promise(function(resolve, reject){
-        let mins = parseInt(entry.dur / 1000 / 60);
+        let mins = Math.round(entry.dur / 1000 / 60);
 
         let transporter = nodemailer.createTransport({
             host: prefs.smtpHost,
@@ -134,5 +154,7 @@ function sendEntry(planfixTaskId, entry) {
     });
 }
 
+module.exports.getEntries = getEntries;
 module.exports.getPendingEntries = getPendingEntries;
+module.exports.groupEntriesByTask = groupEntriesByTask;
 module.exports.sendToPlanfix = sendToPlanfix;

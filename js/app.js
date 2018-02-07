@@ -1,14 +1,14 @@
-var express = require('express');
-var path = require('path');
-var twig = require('twig');
-var settings = require('./settings');
-var toggl = require('./toggl');
-var app = express();
+const express = require('express');
+const path = require('path');
+const twig = require('twig');
+const settings = require('./settings');
+const toggl = require('./toggl');
+const app = express();
 
 app.get('/', async function(req, res, next) {
   // res.render('index', { title: 'planfix-toggl', entries: entries });
-  var entries = await toggl.getPendingEntries(true);
-  var out = entries.map(entry => '[' + entry.project + '] ' + entry.description + ' (' + parseInt(entry.dur/60000) + ')');
+  const entriesAll = await toggl.getPendingEntries();
+  const entries = await toggl.groupEntriesByTask(entriesAll);
   res.render('index.twig', {
     entries: entries,
     title: 'planfix-toggl',
@@ -18,12 +18,13 @@ app.get('/', async function(req, res, next) {
 });
 
 app.get('/send', async function(req, res, next) {
-  var entries = await toggl.getPendingEntries();
-  if(entries.length == 0){
-    res.send('<title>send - planfix-toggl</title>Нечего отправлять');
-  }
-  var entriesSent = await toggl.sendToPlanfix();
-  var out = entriesSent.map(entry => entry.description);
+  const entriesSent = await toggl.sendToPlanfix();
+  res.render('index.twig', {
+    entries: entriesSent,
+    title: 'send - planfix-toggl',
+    header: 'Отправлено',
+    planfix_account: settings.get('planfixAccount')
+  });
 });
 
 app.get('/settings', function(req, res, next) {

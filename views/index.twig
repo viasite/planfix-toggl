@@ -11,7 +11,13 @@
         margin-bottom: 15px;
     }
     .entry__name{
-        display: block;
+        /*display: block;*/
+    }
+    .entry__duration{
+        color: #666;
+    }
+    .entry__project{
+        clear: left;
     }
     .entry__link{
         color: #4573B1;
@@ -29,8 +35,9 @@
         {% for entry in entries %}
             <div class="entry">
                 <span class="entry__name">{{ entry.description }}</span>
+                <span class="entry__duration">{{ (entry.dur / 1000 / 60) | round }}</span>
                 <span class="entry__project" style="color:{{ entry.project_hex_color }}">{{ entry.project }}</span>
-                <a class="entry__link" href="https://{{ planfix_account }}.planfix.ru/task/{{ entry.planfix_task_id }}" target="_blank">#{{ entry.planfix_task_id }}</a>
+                <a class="entry__link" href="https://{{ planfix_account }}.planfix.ru/task/{{ entry.planfix.task_id }}" target="_blank">#{{ entry.planfix_task_id }}</a>
             </div>
         {% endfor %}
     </body>
