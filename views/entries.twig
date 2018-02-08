@@ -4,7 +4,7 @@
         <span class="entry__name">{{ entry.description }}</span>
         <span class="entry__duration">{{ (entry.dur / 1000 / 60) | round }}</span>
         <span class="entry__project" style="color:{{ entry.project_hex_color }}">{{ entry.project }}</span>
-        <a class="entry__link" href="https://{{ planfix_account }}.planfix.ru/task/{{ entry.planfix.task_id }}" target="_blank">#{{ entry.planfix_task_id }}</a>
+        {% if entry.planfix.task_id %}<a class="entry__link" href="https://{{ planfix_account }}.planfix.ru/task/{{ entry.planfix.task_id }}" target="_blank">#{{ entry.planfix.task_id }}</a>{% endif %}
     </div>
 {% endfor %}
 </div>
