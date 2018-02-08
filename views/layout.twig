@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <style>
     body{
+        margin: 0;
+        padding: 0;
         font-size: 16px;
         font-family: Arial;
+        background: #ededed;
     }
     .page__header{
         font-size: 1.4rem;
@@ -10,21 +13,38 @@
     }
     .header{
         font-size: 1.2rem;
-        margin-bottom: 15px;
+        margin: 10px 0;
+    }
+    main{
+        margin: 0 auto;
+        padding: 3px;
     }
     .block{
         margin-bottom: 30px
     }
+    .entries{
+        max-width: 600px;
+    }
     .entry{
-        margin-bottom: 15px;
+        margin-bottom: 3px;
+        padding: 8px;
+        background: #fff;
+        
     }
     .entry__name{
         /*display: block;*/
     }
     .entry__duration{
         color: #666;
+        margin-left: 1rem;
+        float: right;
+    }
+    .entry__group-count{
+        color: #999;
+        margin-right: 1rem;
     }
     .entry__project{
+        display: inline-block;
         clear: left;
     }
     .entry__link{
