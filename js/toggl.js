@@ -18,9 +18,9 @@ async function sendToPlanfix(){
         let entryString = entry.description + ' (' + Math.round(entry.dur / 60000) + ')';
         try{
             await sendEntry(entry.planfix.task_id, entry);
-            console.log('entry ' + entryString + ' sent to #' + entry.planfix.task_id);
+            console.log(new Date().toISOString() + ' - entry ' + entryString + ' sent to #' + entry.planfix.task_id);
         } catch (err){
-            console.log('entry ' + entryString + ' failed');
+            console.log(new Date().toISOString() + ' - entry ' + entryString + ' failed');
         }
     });
     return entries;
@@ -141,7 +141,7 @@ function sendEntry(planfixTaskId, entry) {
                 reject(err);
                 return;
             }
-            console.log('entry [' + entry.project + '] "' + entry.description + '" (' + mins + ') sent to Planfix');
+            console.log(new Date().toISOString() + ' - entry [' + entry.project + '] "' + entry.description + '" (' + mins + ') sent to Planfix');
 
             toggl.updateTimeEntriesTags([entry.id], [prefs.sentTag], 'add', function (err, timeEntries) {
                 if (err !== null) {
