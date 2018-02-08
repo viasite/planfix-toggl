@@ -1,0 +1,15 @@
+{% extends '../layout.twig' %}
+
+{% block header %}{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="header">Сегодня</div>
+        {% include '../entries.twig' with { 'entries': entries_today } %}
+    </div>
+
+    <div class="block">
+        <div class="header">В очереди на отправку</div>
+        {% include '../entries.twig' with { 'entries': entries_pending } %}
+    </div>
+{% endblock %}

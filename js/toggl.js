@@ -14,7 +14,7 @@ const toggl = new TogglClient({ apiToken: prefs.apiToken });
 async function sendToPlanfix(){
     let pendingEntries = await getPendingEntries();
     let entries = groupEntriesByTask(pendingEntries);
-    entries.forEach(entry => (async (entry) => {
+    entries.forEach(async (entry) => {
         let entryString = entry.description + ' (' + Math.round(entry.dur / 60000) + ')';
         try{
             await sendEntry(entry.planfix.task_id, entry);
@@ -22,17 +22,17 @@ async function sendToPlanfix(){
         } catch (err){
             console.log('entry ' + entryString + ' failed');
         }
-    })(entry));
+    });
     return entries;
 }
 
 function groupEntriesByTask(entries){
     let grouped = {};
     entries.forEach(entry => {
-        if(grouped.hasOwnProperty(entry.planfix_task_id)){
-            grouped[entry.planfix_task_id].dur += entry.dur;
+        if(grouped.hasOwnProperty(entry.planfix.task_id)){
+            grouped[entry.planfix.task_id].dur += entry.dur;
         } else {
-            grouped[entry.planfix_task_id] = entry;
+            grouped[entry.planfix.task_id] = entry;
         }
     });
     return Object.values(grouped);
@@ -81,7 +81,7 @@ async function getEntries(opts){
         }
 
         entry.tags.forEach(tag => {
-            // only digit == planfix_task_id
+            // only digit == planfix.task_id
             if (tag.match(/^\d+$/)) {
                 entry.planfix.task_id = parseInt(tag);
             }

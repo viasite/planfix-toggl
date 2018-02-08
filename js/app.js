@@ -6,11 +6,17 @@ const toggl = require('./toggl');
 const app = express();
 
 app.get('/', async function(req, res, next) {
-  // res.render('index', { title: 'planfix-toggl', entries: entries });
-  const entriesAll = await toggl.getPendingEntries();
-  const entries = await toggl.groupEntriesByTask(entriesAll);
-  res.render('index.twig', {
-    entries: entries,
+  const entries_pending = toggl.groupEntriesByTask(await toggl.getPendingEntries());
+
+  let date = new Date();
+  //date.setDate(date.getDate() - 1);
+  const entries_today = toggl.groupEntriesByTask(await toggl.getEntries({
+    since: date.toISOString()
+  }));
+
+  res.render('pages/index.twig', {
+    entries_pending: entries_pending,
+    entries_today: entries_today,
     title: 'planfix-toggl',
     header: 'Ожидают отправки',
     planfix_account: settings.get('planfixAccount')
@@ -19,7 +25,7 @@ app.get('/', async function(req, res, next) {
 
 app.get('/send', async function(req, res, next) {
   const entriesSent = await toggl.sendToPlanfix();
-  res.render('index.twig', {
+  res.render('pages/send.twig', {
     entries: entriesSent,
     title: 'send - planfix-toggl',
     header: 'Отправлено',

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<style>
+    body{
+        font-size: 16px;
+        font-family: Arial;
+    }
+    .page__header{
+        font-size: 1.4rem;
+        margin-bottom: 30px;
+    }
+    .header{
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    .block{
+        margin-bottom: 30px
+    }
+    .entry{
+        margin-bottom: 15px;
+    }
+    .entry__name{
+        /*display: block;*/
+    }
+    .entry__duration{
+        color: #666;
+    }
+    .entry__project{
+        clear: left;
+    }
+    .entry__link{
+        color: #4573B1;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-left: 1rem;
+    }
+</style>
+<html>
+    <head>
+        <title>{{ title }}</title>
+    </head>
+    <body>
+        {% block header %}<div class="page__header">{{ header }}</div>{% endblock %}
+        <main>{% block content %}ere{% endblock %}</main>
+    </body>
+</html>
