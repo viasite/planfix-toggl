@@ -31,6 +31,7 @@ function groupEntriesByTask(entries){
     entries.forEach(entry => {
         if(grouped.hasOwnProperty(entry.planfix.task_id)){
             grouped[entry.planfix.task_id].dur += entry.dur;
+            grouped[entry.planfix.task_id].planfix.group_count += 1;
         } else {
             grouped[entry.planfix.task_id] = entry;
         }
@@ -77,8 +78,9 @@ async function getEntries(opts){
     return report.data.map(entry => {
         entry.planfix = {
             sent: false,
-            task_id: 0
-        }
+            task_id: 0,
+            group_count: 1
+        };
 
         entry.tags.forEach(tag => {
             // only digit == planfix.task_id
