@@ -1,7 +1,7 @@
 <template>
   <ul class="entries">
     <li v-for="entry in entries" v-bind:key="entry.id">
-      <Entry :entry="entry" :planfix-account="planfixAccount"></Entry>
+      <Entry :entry="entry"></Entry>
     </li>
   </ul>
 </template>

@@ -2,13 +2,13 @@
   <main class="content">
 
     <div class="header">Сегодня:</div>
-    <EntriesList :entries="entries_today" :planfix-account="settings.planfixAccount"></EntriesList>
+    <EntriesList :entries="entries_today"></EntriesList>
 
     <div class="header">Ожидают отправки:</div>
-    <EntriesList :entries="entries_pending" :planfix-account="settings.planfixAccount"></EntriesList>
+    <EntriesList :entries="entries_pending"></EntriesList>
 
     <div class="header">Последние:</div>
-    <EntriesList :entries="entries_last" :planfix-account="settings.planfixAccount"></EntriesList>
+    <EntriesList :entries="entries_last"></EntriesList>
   </main>
 </template>
 
@@ -39,7 +39,6 @@
         asyncData.entries_today = await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'today'} });
         asyncData.entries_pending = await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'pending'} });
         asyncData.entries_last = await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'last'} });
-        asyncData.settings = { planfixAccount: 'tagilcity' };
       } catch (e) {
         throw Error(e)
       }

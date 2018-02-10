@@ -6,7 +6,7 @@
     <div class="entry__second">
       <span class="entry__project" :style="'color:' + entry.project_hex_color">{{ entry.project }}</span>
       <a v-if="entry.planfix.task_id" class="entry__link"
-         :href="'https://' + planfixAccount + '.planfix.ru/task/' + entry.planfix.task_id"
+         :href="'https://' + $store.state.planfixAccount + '.planfix.ru/task/' + entry.planfix.task_id"
          target="_blank">
         #{{ entry.planfix.task_id }}
       </a>
@@ -51,10 +51,6 @@
     props: {
       entry: {
         type: Object,
-        required: true
-      },
-      planfixAccount: {
-        type: String,
         required: true
       }
     },
