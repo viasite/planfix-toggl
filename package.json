@@ -30,7 +30,6 @@
     "express": "~4.15.5",
     "js-yaml": "^3.10.0",
     "nodemailer": "^4.4.2",
-    "toggl-api": "^1.0.1",
-    "twig": "^1.10.5"
+    "toggl-api": "^1.0.1"
   }
 }

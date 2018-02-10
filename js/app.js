@@ -1,36 +1,31 @@
 const express = require('express');
-const path = require('path');
-const twig = require('twig');
 const settings = require('./settings');
 const toggl = require('./toggl');
 const app = express();
 
 app.get('/', async function(req, res, next) {
-  const entries_pending = toggl.groupEntriesByTask(await toggl.getPendingEntries());
+  res.redirect('http://localhost:3001/');
+});
 
-  let date = new Date();
-  //date.setDate(date.getDate() - 1);
-  const entries_today = toggl.groupEntriesByTask(await toggl.getEntries({
-    since: date.toISOString()
-  }));
-
-  res.render('pages/index.twig', {
-    entries_pending: entries_pending,
-    entries_today: entries_today,
-    title: 'planfix-toggl',
-    header: 'Ожидают отправки',
-    planfix_account: settings.get('planfixAccount')
-  });
+app.get('/api/toggl/entries', async function(req, res, next) {
+  let entries;
+  if(req.query.type == 'today'){
+    let date = new Date();
+    date.setDate(date.getDate() - 0);
+    entries = toggl.groupEntriesByTask(await toggl.getEntries({
+      since: date.toISOString()
+    }));
+  } else if(req.query.type == 'pending'){
+    entries = toggl.groupEntriesByTask(await toggl.getPendingEntries());
+  } else if(req.query.type == 'last'){
+    entries = toggl.groupEntriesByTask(await toggl.getEntries({}));
+  }
+  res.send(entries);
 });
 
 app.get('/send', async function(req, res, next) {
   const entriesSent = await toggl.sendToPlanfix();
-  res.render('pages/send.twig', {
-    entries: entriesSent,
-    title: 'send - planfix-toggl',
-    header: 'Отправлено',
-    planfix_account: settings.get('planfixAccount')
-  });
+  res.send(entriesSent);
 });
 
 app.get('/settings', function(req, res, next) {
