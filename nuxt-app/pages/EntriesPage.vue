@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <div>
-        <div class="toolbar"><div class="toolbar__center">{{ label }}</div></div>
-        <EntriesList :entries="entries"></EntriesList>
-    </div>
-  </div>
+  <v-ons-page>
+    <v-ons-list-header>{{ label }}</v-ons-list-header>
+    <EntriesList :entries="entries"></EntriesList>
+  </v-ons-page>
 </template>
 
 <script type="text/javascript">
