@@ -1,5 +1,6 @@
 <template>
-  <div class="entries"> 
+  
+  <div class="entries">
     <div v-for="entry in entries" v-bind:key="entry.id">
       <Entry :entry="entry"></Entry>
     </div>
