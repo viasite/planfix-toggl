@@ -1,5 +1,5 @@
 <template>
-  <div class="entry">
+  <v-ons-card class="entry">
     <span class="entry__group-count">{{ entry.planfix.group_count }}</span>
     <span class="entry__name">{{ entry.description }}</span>
     <span class="entry__duration">{{ (entry.dur / 1000 / 60) | round }}</span>
@@ -11,20 +11,13 @@
         #{{ entry.planfix.task_id }}
       </a>
     </div>
-  </div>
+  </v-ons-card>
 </template>
 
 <style>
-  .entry {
-    margin-bottom: 3px;
-    padding: 8px;
-    background: #fff;
-  }
   .entry__name {
-    /*display: block;*/
   }
   .entry__duration {
-    color: #666;
     margin-left: 1rem;
     float: right;
   }

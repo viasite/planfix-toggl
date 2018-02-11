@@ -1,28 +1,20 @@
 <template>
-  <main class="content">
-
-    <div class="header">Сегодня:</div>
+  <v-ons-page>
+    <div class="toolbar"><div class="toolbar__center">Сегодня:</div></div>
     <EntriesList :entries="entries_today"></EntriesList>
 
-    <div class="header">Ожидают отправки:</div>
+    <div class="toolbar"><div class="toolbar__center">Ожидают отправки:</div></div>
     <EntriesList :entries="entries_pending"></EntriesList>
 
-    <div class="header">Последние:</div>
+    <div class="toolbar"><div class="toolbar__center">Последние:</div></div>
     <EntriesList :entries="entries_last"></EntriesList>
-  </main>
+  </v-ons-page>
 </template>
 
 <style>
-  .page__header {
-    font-size: 1.4rem;
-    margin-bottom: 30px;
-  }
-  .header {
-    font-size: 1.2rem;
-    margin: 10px 0;
-  }
-  .block {
-    margin-bottom: 30px
+  ons-page > .page__content{
+    max-width: 600px;
+    margin: 0 auto;
   }
 </style>
 

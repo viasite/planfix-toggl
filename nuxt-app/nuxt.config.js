@@ -2,6 +2,9 @@ module.exports = {
   modules: [
     '@nuxtjs/axios',
   ],
+  plugins: [
+    { src: '~/plugins/onsenui', ssr: false }
+  ],
   /*
   ** Headers of the page
   */
@@ -37,5 +40,9 @@ module.exports = {
         })
       }
     }
-  }
+  },
+  css: [
+    { src: 'onsenui/css/onsenui-core.css', lang: 'css' },
+    { src: 'onsenui/css/onsen-css-components.css', lang: 'css' },
+  ]
 }
