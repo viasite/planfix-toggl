@@ -49,8 +49,12 @@
     },
     computed: {
       index: {
-        get: () => 1, //this.$store.state.tabbar.index,
-        set: newValue => true //this.$store.commit('tabbar/set', newValue)
+        get(){ 
+          return this.$store.state.tabIndex
+        },
+        set(newValue){
+          this.$store.commit('tabIndex', newValue)
+        }
       }
     }
   }
