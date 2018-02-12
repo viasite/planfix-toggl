@@ -30,9 +30,9 @@
       let asyncData
       try {
         asyncData = {
-          entries_today: await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'today'} }),
-          entries_pending: await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'pending'} }),
-          entries_last: await app.$axios.$get('http://localhost:3000/api/toggl/entries', { params: {type:'last'} }),
+          entries_today: await app.$axios.$get('http://localhost:3000/api/v1/toggl/entries', { params: {type:'today'} }),
+          entries_pending: await app.$axios.$get('http://localhost:3000/api/v1/toggl/entries', { params: {type:'pending'} }),
+          entries_last: await app.$axios.$get('http://localhost:3000/api/v1/toggl/entries', { params: {type:'last'} }),
         }
         asyncData.tabs = [
           { label: 'Сегодня', props: { entries: asyncData.entries_today } },

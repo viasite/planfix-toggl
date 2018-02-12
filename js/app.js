@@ -7,7 +7,7 @@ app.get('/', async function(req, res, next) {
   res.redirect('http://localhost:3001/');
 });
 
-app.get('/api/toggl/entries', async function(req, res, next) {
+app.get('/api/v1/toggl/entries', async function(req, res, next) {
   let entries;
   if(req.query.type == 'today'){
     let date = new Date();
