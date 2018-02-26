@@ -36,7 +36,9 @@ npm start
 скорее всего, pull request никогда не примут, можно поставить его в режиме разработчика отсюда:
 https://github.com/popstas/toggl-button
 
+# Unmaintained
 
+Проект разделился на [planfix-toggl-server](https://github.com/viasite/planfix-toggl-server) и [planfix-toggl-client](https://github.com/viasite/planfix-toggl-client).
 
 ## Настройка
 
