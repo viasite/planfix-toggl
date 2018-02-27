@@ -1,3 +1,7 @@
+# Unmaintained
+
+Проект разделился на [planfix-toggl-server](https://github.com/viasite/planfix-toggl-server) и [planfix-toggl-client](https://github.com/viasite/planfix-toggl-client).
+
 # Planfix-Toggl
 Electron приложение, написанное на коленке, отправляет данные из Toggl в Планфикс, сделан для того, чтобы избавить людей, трекающих свою активность в Toggl, от ручного переноса данных в Планфикс.
 
@@ -35,10 +39,6 @@ npm start
 Для облегчения проставления тегов в записи было дописано официальное расширение Toggl Chrome,
 скорее всего, pull request никогда не примут, можно поставить его в режиме разработчика отсюда:
 https://github.com/popstas/toggl-button
-
-# Unmaintained
-
-Проект разделился на [planfix-toggl-server](https://github.com/viasite/planfix-toggl-server) и [planfix-toggl-client](https://github.com/viasite/planfix-toggl-client).
 
 ## Настройка
 
